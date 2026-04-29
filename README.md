@@ -30,7 +30,7 @@ skills-desarrollo/
 
 | Skill | Descripción | Ruta |
 |---|---|---|
-| `peticion-http` | Estandariza peticiones HTTP salientes en APIs Go usando `github.com/udistrital/utils_oas`. | `skills/peticion-http/` |
+| `peticion-http` | Estandariza peticiones HTTP salientes en APIs Go usando. | `skills/peticion-http/` |
 
 ## Requisitos mínimos por skill
 
@@ -112,17 +112,8 @@ Usa esta skill para revisar y refactorizar las peticiones HTTP salientes del rep
 No cierres la tarea hasta cumplir las reglas y criterios definidos.
 ```
 
-## Skill incluida: `peticion-http`
 
-Esta skill está orientada a repositorios Go y obliga a estandarizar integraciones HTTP salientes usando `github.com/udistrital/utils_oas`.
-
-Archivos principales:
-
-- `skills/peticion-http/SKILL.md`
-- `skills/peticion-http/openai.yaml`
-- `skills/peticion-http/references/portable-prompt.md`
-
-## Cómo agregar una nueva skill
+## Agregar una nueva skill
 
 Crear la estructura base:
 
