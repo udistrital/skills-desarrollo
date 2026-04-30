@@ -21,7 +21,8 @@ Objetivo:
 - No aceptar `replace github.com/udistrital/utils_oas => ...`, forks locales, checkouts manuales ni `vendor/github.com/udistrital/utils_oas` como prueba válida de que se está usando la versión remota.
 - Refrescar la dependencia con `go get github.com/udistrital/utils_oas@v0.5.0-beta.2` y luego revalidar la resolución efectiva.
 - Migrar a las funciones nuevas que reciben context.Context y propagar el ctx correcto hasta cada llamada.
-- Modificar firmas y call sites para propagar ctx cuando el caso esté cubierto por `request.*WithContext`.
+- Modificar firmas y call sites para propagar ctx solo cuando el caso quede efectivamente migrado a `request.*WithContext`.
+- No propagar ctx en cadenas que sigan usando helpers o clientes sin soporte real de `context.Context`; en esos casos debe documentarse la brecha y mantenerse la firma existente si el cambio no tiene efecto real.
 - Eliminar duplicaciones y helpers HTTP paralelos.
 - Documentar únicamente excepciones técnicas reales.
 - Si algo todavía no puede pasar por utils_oas, registrarlo como brecha que debe corregirse en utils_oas.
@@ -32,6 +33,7 @@ Objetivo:
 - Si ya está confirmado que el tag objetivo sí contiene `PostWithContext`, `PutWithContext`, `PatchWithContext` y `DeleteWithContext`, no aceptar como excusa que el asistente “no encontró” esos símbolos en su entorno local.
 - Antes de cerrar, ejecutar auditoría textual repo-wide de usos remanentes; si no se ejecuta o quedan remanentes, reportar `Estado: incompleto`.
 - La auditoría repo-wide para cumplimiento debe centrarse en código productivo; los hallazgos en `tests/` o `*_test.go` deben reportarse aparte y no invalidan por sí solos el cierre si el objetivo productivo quedó bien migrado.
+- Los hallazgos de `golangci-lint` en código no tocado por la tarea actual deben reportarse aparte y no deben corregirse incidentalmente salvo instrucción explícita del usuario o bloqueo directo del objetivo.
 - El asistente no puede crear `.gomodcache`, `.gocache` ni temporales de build dentro del repo o del workspace. Si el entorno no ofrece una ruta temporal externa y la única alternativa sería ensuciar el árbol, debe detenerse y reportar bloqueo de infraestructura.
 
 Reglas:
@@ -59,6 +61,7 @@ Criterio de selección:
 - Solo dejar funciones históricas de `request` o `requestresponse` si `request.*WithContext` no preserva el comportamiento; en ese caso documentar por qué no se usó.
 - Si el caso está cubierto por `request.*WithContext`, ese debe ser el destino final de la migración salvo excepción documentada.
 - Si el flujo actual depende de `Authorization` u otros headers que no estén cubiertos por la firma nueva verificada en `v0.5.0-beta.2`, usar otra función de utils_oas que conserve el comportamiento o documentar la brecha para corregirla en utils_oas.
+- Si una excepción real obliga a mantener un helper o cliente sin soporte real de `context.Context`, no propagar `ctx` por capas previas solo para aparentar consistencia de firmas.
 - No dejar wrappers locales genéricos tipo `getJson`, `GetJsonTest`, `sendJson`, `sendJson3`, `getXml` o equivalentes cuando utils_oas ya tiene la función necesaria.
 - No dejar `request.GetJson`, `request.GetJsonTest2`, `request.GetJsonWSO2Test`, `request.SendJson` o `request.SendJson2` como solución final si existe cobertura con `request.*WithContext`.
 - No dejar `request.SendJson` o `request.SendJson2` por fallas de cache, IDE, autocompletado o resolución local.

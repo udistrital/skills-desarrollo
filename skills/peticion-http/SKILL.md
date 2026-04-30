@@ -18,6 +18,8 @@ La migración a `utils_oas` debe forzarse para todos los casos cubiertos por la 
 
 La preferencia arquitectónica por defecto es: todo por `utils_oas` y, dentro de `utils_oas`, primero `request.*WithContext` cuando preserve el comportamiento.
 
+Los hallazgos de `golangci-lint` fuera del código tocado por la tarea actual no deben corregirse como parte incidental del trabajo de esta skill. Si aparecen, se reportan como contexto o riesgo, pero no se arreglan salvo que el usuario lo pida o bloqueen directamente el objetivo solicitado.
+
 Si ya existe confirmación explícita del usuario, del equipo o de evidencia previa confiable de que el tag objetivo `v0.5.0-beta.2` sí contiene `GetWithContext`, `PostWithContext`, `PutWithContext`, `PatchWithContext` y `DeleteWithContext`, el agente no puede seguir actuando como si esos símbolos fueran dudosos o ausentes.
 
 Si el usuario corrige la versión objetivo de `utils_oas`, esa corrección prevalece inmediatamente sobre cualquier supuesto previo del agente. No es válido seguir operando, justificando verificaciones o reportando bloqueos sobre `beta.1` cuando el contexto vigente ya fija `v0.5.0-beta.2`.
@@ -33,8 +35,10 @@ Si el usuario corrige la versión objetivo de `utils_oas`, esa corrección preva
 * Verificar la existencia real de la función `*WithContext` correspondiente en `utils_oas@v0.5.0-beta.2` antes de aceptar cualquier excepción por falta de cobertura.
 * Si ya está confirmado que `v0.5.0-beta.2` contiene las funciones `*WithContext`, no aceptar como salida final ningún `request.SendJson`, `request.SendJson2`, `request.GetJson`, `request.GetJsonTest2` o `request.GetJsonWSO2Test` en casos cubiertos.
 * Preservar contrato antes/después: endpoint, payload, headers, `Authorization`, timeout, respuesta, destino y errores.
-* Propagar `context.Context` cuando la función elegida lo soporte.
-* Modificar firmas y call sites para propagar `context.Context` hasta la integración saliente cuando el caso esté cubierto por `request.*WithContext`.
+* Corregir hallazgos de `golangci-lint` solo dentro del alcance tocado por la tarea actual; si el lint reporta problemas preexistentes en código no modificado, reportarlos sin arreglarlos salvo bloqueo explícito del objetivo o instrucción del usuario.
+* Propagar `context.Context` solo cuando la función elegida lo soporte de forma real en la salida HTTP.
+* Modificar firmas y call sites para propagar `context.Context` hasta la integración saliente cuando el caso quede efectivamente migrado a `request.*WithContext`.
+* Si una integración no pudo migrarse a una función de `utils_oas` con soporte real de `context.Context`, no propagar `ctx` por capas intermedias solo para "dejar lista" la cadena; documentar la brecha y conservar la firma existente si no aporta efecto real.
 * No usar `net/http`, helpers locales, wrappers tipo `sendjson` ni `requestmanager` como cliente saliente.
 * Si `utils_oas` no cubre un caso, documentarlo como brecha para corregir en `utils_oas`.
 * No dar por terminada la migración solo porque un helper local ahora delega en `utils_oas`.
@@ -766,7 +770,8 @@ cat lint_report.xml
 * [ ] Cada integración cruza correctamente verbo real y función `utils_oas`.
 * [ ] Se preservó contrato funcional antes/después.
 * [ ] `ctx`, headers y `Authorization` se preservaron o la brecha quedó documentada.
-* [ ] Las firmas y call sites necesarios fueron modificados para propagar `ctx` hasta la salida HTTP.
+* [ ] Las firmas y call sites necesarios fueron modificados para propagar `ctx` hasta la salida HTTP solo en integraciones efectivamente migradas a funciones con soporte real de contexto.
+* [ ] No se introdujo propagación de `ctx` en cadenas que siguen usando helpers o clientes sin soporte real de `context.Context`.
 * [ ] No se usó `requestmanager` como cliente saliente.
 * [ ] No se usaron alias innecesarios.
 * [ ] No quedaron wrappers locales genéricos tipo `getJson`, `GetJsonTest`, `sendJson`, `sendJson3`, `getXml` o equivalentes cuando `utils_oas` ya cubre el caso.
@@ -785,6 +790,7 @@ cat lint_report.xml
 * [ ] Si el usuario no limitó el alcance, se ejecutó auditoría repo-wide de remanentes antes del cierre.
 * [ ] No se crearon caches ni temporales de Go dentro del workspace o del repositorio durante la ejecución.
 * [ ] Si quedaron excepciones o remanentes, el reporte final los declaró explícitamente como trabajo incompleto y no como cierre total.
+* [ ] Los hallazgos de `golangci-lint` sobre código no tocado se reportaron, pero no se arreglaron incidentalmente como parte de esta skill.
 
 ## Formato de salida obligatorio
 
@@ -814,4 +820,4 @@ Reglas:
 
 ## Modos de Falla
 
-El agente está ejecutando mal este skill si no intenta primero migrar a `request.*WithContext`, no modifica firmas o call sites para propagar `ctx` cuando el caso está cubierto, deja `request.GetJson`, `request.GetJsonTest2`, `request.GetJsonWSO2Test`, `request.SendJson` o `request.SendJson2` como solución final en casos cubiertos por `request.*WithContext`, usa `request.GetWithContext(context.Background(), ...)` en código productivo en vez de propagar el contexto real de la petición, corta la cadena de propagación del `ctx` entre controller/handler y la integración saliente, no hace verificación repo-wide de remanentes de esas funciones históricas, toma un flujo puntual como si fuera alcance total sin límite explícito del usuario, confía en una copia previa cacheada de `utils_oas` sin limpiar `GOMODCACHE` y redescargar desde el tag objetivo cuando el entorno sí lo permitía, acepta un `replace` local o `vendor/` como si eso garantizara la versión remota, toma una falla de IDE, autocompletado o resolución local como si demostrara que `PostWithContext`/`PutWithContext`/`PatchWithContext`/`DeleteWithContext` no existen en el tag ya confirmado, migra todo a una sola capa sin analizar contrato, evita migrar a `utils_oas` por riesgo sin intentar una migración compatible, conserva helpers "por si acaso", convierte `utilidades.go` u otro archivo en una capa de pass-through hacia `utils_oas` y no modifica los call sites reales, deja wrappers locales genéricos como estado final, deja una “segunda fase” pendiente para call sites ya cubiertos por `request.*WithContext`, rompe `Authorization`, ignora `LimpiezaRespuestaRefactor`, usa `requestresponse` sin validar parser, deja código duplicado, acepta una excepción sin brecha de `utils_oas`, conserva llamadas sin `context` sin justificarlo, omite el formato de salida obligatorio, o reporta el trabajo como completado cuando todavía existen excepciones, remanentes o verificaciones obligatorias pendientes.
+El agente está ejecutando mal este skill si no intenta primero migrar a `request.*WithContext`, no modifica firmas o call sites para propagar `ctx` cuando el caso está cubierto, deja `request.GetJson`, `request.GetJsonTest2`, `request.GetJsonWSO2Test`, `request.SendJson` o `request.SendJson2` como solución final en casos cubiertos por `request.*WithContext`, usa `request.GetWithContext(context.Background(), ...)` en código productivo en vez de propagar el contexto real de la petición, corta la cadena de propagación del `ctx` entre controller/handler y la integración saliente, propaga `ctx` en firmas intermedias aunque la salida HTTP siga en un helper o cliente sin soporte real de contexto, corrige de forma incidental hallazgos de `golangci-lint` en archivos no tocados por la tarea actual, no hace verificación repo-wide de remanentes de esas funciones históricas, toma un flujo puntual como si fuera alcance total sin límite explícito del usuario, confía en una copia previa cacheada de `utils_oas` sin limpiar `GOMODCACHE` y redescargar desde el tag objetivo cuando el entorno sí lo permitía, acepta un `replace` local o `vendor/` como si eso garantizara la versión remota, toma una falla de IDE, autocompletado o resolución local como si demostrara que `PostWithContext`/`PutWithContext`/`PatchWithContext`/`DeleteWithContext` no existen en el tag ya confirmado, migra todo a una sola capa sin analizar contrato, evita migrar a `utils_oas` por riesgo sin intentar una migración compatible, conserva helpers "por si acaso", convierte `utilidades.go` u otro archivo en una capa de pass-through hacia `utils_oas` y no modifica los call sites reales, deja wrappers locales genéricos como estado final, deja una “segunda fase” pendiente para call sites ya cubiertos por `request.*WithContext`, rompe `Authorization`, ignora `LimpiezaRespuestaRefactor`, usa `requestresponse` sin validar parser, deja código duplicado, acepta una excepción sin brecha de `utils_oas`, conserva llamadas sin `context` sin justificarlo, omite el formato de salida obligatorio, o reporta el trabajo como completado cuando todavía existen excepciones, remanentes o verificaciones obligatorias pendientes.
