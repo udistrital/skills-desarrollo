@@ -19,6 +19,9 @@ skills-desarrollo/
 ├── README.md
 ├── .gitignore
 └── skills/
+    ├── agora-pr-reviewer/
+    ├── agora-backlog-planner/
+    ├── agora-story-validator/
     └── peticion-http/
         ├── SKILL.md
         ├── openai.yaml
@@ -31,6 +34,9 @@ skills-desarrollo/
 | Skill | Descripción | Ruta |
 |---|---|---|
 | `peticion-http` | Estandariza peticiones HTTP salientes en APIs Go usando. | `skills/peticion-http/` |
+| `agora-pr-reviewer` | Revisa PRs, trazabilidad HU y contratos entre capas; solo informe local. | [Documentación](skills/agora-pr-reviewer/README.md) |
+| `agora-backlog-planner` | Planifica HU seleccionadas con mapeo provisional de Excel y dry-run. | [Documentación](skills/agora-backlog-planner/README.md) |
+| `agora-story-validator` | Valida aceptación de HU con evidencia por criterio y DoD por repositorio. | [Documentación](skills/agora-story-validator/README.md) |
 
 ## Requisitos mínimos por skill
 
@@ -146,3 +152,30 @@ Usar nombres en minúscula y separados por guiones:
 - Confirmar que los nombres invocables coincidan con el nombre de carpeta.
 - Evitar referencias rotas en README o prompts.
 - Mantener ejemplos de instalación y uso actualizados.
+
+## Uso de las skills AGORA
+
+```text
+$agora-pr-reviewer owner/repository#123 — genera un informe local
+$agora-backlog-planner — usa project.json y run.json para las HU seleccionadas
+$agora-story-validator HU-ID — valida con su enlace o localizador configurado
+```
+
+Estos identificadores son ejemplos de formato. La entrada del revisor es una PR; el validador también puede partir de una Issue para descubrir la HU. La HU es la fuente funcional y cada Issue describe trabajo específico de CRUD, MID o FRONT. La aprobación recomendada de una PR es independiente de la aceptación de la HU completa.
+
+Las tres skills son independientes y solo producen artefactos locales. No escriben en GitHub; **Developed siempre es solo lectura**. El planificador rechaza `apply` por código. Las plantillas y lineamientos se consultan desde sus repositorios autoritativos; no se fijan IDs internos de Project. El Excel final aún no existe: la configuración y los datos de ejemplo están marcados como provisionales/sintéticos.
+
+Cada skill AGORA incluye `agents/openai.yaml` además del `openai.yaml` de esta convención, con contenido idéntico para compatibilidad de metadatos Codex. No necesita instalar las otras dos ni `peticion-http`.
+
+### Comprobación local del planificador
+
+```bash
+python3 skills/agora-backlog-planner/scripts/prepare_backlog.py \
+  --config skills/agora-backlog-planner/examples/project.example.json \
+  --run skills/agora-backlog-planner/examples/run.example.json
+python3 -B -m unittest discover -s skills/agora-backlog-planner/tests -v
+```
+
+La extracción CSV usa biblioteca estándar; XLSX necesita `openpyxl` 3.x. El helper produce paquetes para planificación, no cuerpos finales de Issues; la skill completa descripción, plantilla, criterios, estimación y DoR mediante evidencia. Los ejercicios de revisión y aceptación están en los respectivos directorios `examples/` y son ensayos manuales, no validaciones de PRs/HU reales.
+
+Pendientes de adopción: workbook definitivo y localizadores HU compartibles, opciones/tipos reales de Project 120, capacidad/asignaciones, repositorio MID Terceros y reglas operativas WSO2 específicas de AGORA. El detalle de adaptación del Excel está en el README del planificador.

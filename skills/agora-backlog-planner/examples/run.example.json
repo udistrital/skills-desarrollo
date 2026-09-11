@@ -1,0 +1,14 @@
+{
+  "notice": "SYNTHETIC / EXAMPLE / PROVISIONAL",
+  "synthetic": true,
+  "workbook": "synthetic-requirements.csv",
+  "sheet": "Synthetic",
+  "selection": {
+    "requirement_ids": [
+      "SYN-HU-001",
+      "SYN-HU-002"
+    ]
+  },
+  "sprint": "EXAMPLE-WEEK-NOT-A-REAL-ITERATION",
+  "mode": "dry-run"
+}

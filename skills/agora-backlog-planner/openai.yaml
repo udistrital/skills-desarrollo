@@ -1,0 +1,4 @@
+interface:
+  display_name: "agora-backlog-planner"
+  short_description: "Planificación segura de HU seleccionadas para AGORA"
+  default_prompt: "Usa $agora-backlog-planner. Planifica las HU seleccionadas con la configuración y ejecución adjuntas en dry-run."

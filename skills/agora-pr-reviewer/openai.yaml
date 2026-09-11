@@ -1,0 +1,4 @@
+interface:
+  display_name: "agora-pr-reviewer"
+  short_description: "Revisión local de PR y consistencia HU entre capas"
+  default_prompt: "Usa $agora-pr-reviewer. Revisa este PR AGORA en modo informe local y separa decisión PR del estado HU."
