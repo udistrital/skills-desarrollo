@@ -1,0 +1,4 @@
+Example_HU,Example_Description,Example_Link,CRUD_Repository,MID_Repository,Front_Repository,Example_Epic,Example_Activity,Example_Priority
+SYN-HU-001,SINTÉTICO: consultar objetos de demostración,,udistrital/agora_crud,udistrital/agora_mid,udistrital/agora_mf,EPIC-SYN,ACT-SYN,2
+SYN-HU-002,SINTÉTICO: presentar datos institucionales existentes,,,udistrital/agora_mid,udistrital/agora_mf,EPIC-SYN,ACT-SYN,3
+SYN-HU-003,SINTÉTICO: falta definir criterios y dependencias,,udistrital/agora_crud,,,EPIC-SYN,ACT-SYN,1

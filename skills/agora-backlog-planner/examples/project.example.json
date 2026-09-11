@@ -1,0 +1,38 @@
+{
+  "notice": "EXAMPLE / PROVISIONAL — no es el esquema Excel final",
+  "github": {
+    "organization": "udistrital",
+    "project_number": 120,
+    "templates_repository": "udistrital/agora_documentacion"
+  },
+  "estimation": {
+    "allowed_points": [
+      1,
+      2,
+      3,
+      5,
+      8,
+      13
+    ]
+  },
+  "project_fields": {
+    "developed_is_read_only": true
+  },
+  "services": {
+    "terceros_mid_repository": null
+  },
+  "mapping": {
+    "header_row": 1,
+    "columns": {
+      "requirement_id": "Example_HU",
+      "description": "Example_Description",
+      "hu_source_link": "Example_Link",
+      "crud_repository": "CRUD_Repository",
+      "mid_repository": "MID_Repository",
+      "front_repository": "Front_Repository",
+      "epic": "Example_Epic",
+      "activity": "Example_Activity",
+      "priority": "Example_Priority"
+    }
+  }
+}

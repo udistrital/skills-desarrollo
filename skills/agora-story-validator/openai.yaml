@@ -1,0 +1,4 @@
+interface:
+  display_name: "agora-story-validator"
+  short_description: "Aceptación de HU por criterios, DoD y evidencia"
+  default_prompt: "Usa $agora-story-validator. Valida esta HU para cierre de Sprint con evidencia por criterio y por repositorio."
